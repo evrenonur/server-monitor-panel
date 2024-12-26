@@ -264,82 +264,54 @@
                     </div>
                 @endif
 
-                <!-- Process'ler -->
-                @if($lastSystemInfo->processInfo)
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-tasks mr-1"></i>
-                                Çalışan Süreçler
-                                <span class="badge badge-info ml-1">{{ $lastSystemInfo->processInfo->total_processes }}</span>
-                            </h3>
-                            <div class="card-tools">
-                                <span class="badge badge-success mr-1">
-                                    <i class="fas fa-play"></i> Çalışan: {{ $lastSystemInfo->processInfo->running }}
-                                </span>
-                                <span class="badge badge-secondary mr-1">
-                                    <i class="fas fa-pause"></i> Uyuyan: {{ $lastSystemInfo->processInfo->sleeping }}
-                                </span>
-                                <span class="badge badge-warning mr-1">
-                                    <i class="fas fa-stop"></i> Durmuş: {{ $lastSystemInfo->processInfo->stopped }}
-                                </span>
-                                <span class="badge badge-danger">
-                                    <i class="fas fa-skull"></i> Zombi: {{ $lastSystemInfo->processInfo->zombie }}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-bordered table-striped" id="processes-table">
-                                <thead>
-                                    <tr>
-                                        <th>PID</th>
-                                        <th>Süreç</th>
-                                        <th>Kullanıcı</th>
-                                        <th>CPU %</th>
-                                        <th>Bellek %</th>
-                                        <th>Durum</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($lastSystemInfo->processInfo->processes->sortByDesc('memory_percent') as $process)
-                                        <tr>
-                                            <td>{{ $process->pid }}</td>
-                                            <td>
-                                                <i class="fas fa-cog text-muted mr-1"></i>
-                                                {{ $process->name }}
-                                            </td>
-                                            <td>
-                                                <i class="fas fa-user text-muted mr-1"></i>
-                                                {{ $process->username }}
-                                            </td>
-                                            <td>
-                                                <div class="progress" style="height: 20px;">
-                                                    <div class="progress-bar bg-info" 
-                                                         style="width: {{ $process->cpu_percent }}%"
-                                                         title="{{ number_format($process->cpu_percent, 1) }}%">
-                                                        {{ number_format($process->cpu_percent, 1) }}%
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="progress" style="height: 20px;">
-                                                    <div class="progress-bar bg-{{ 
-                                                        $process->memory_percent > 80 ? 'danger' : 
-                                                        ($process->memory_percent > 60 ? 'warning' : 'success') 
-                                                    }}" style="width: {{ $process->memory_percent }}%"
-                                                    title="{{ number_format($process->memory_percent, 1) }}%">
-                                                        {{ number_format($process->memory_percent, 1) }}%
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>{{ \App\Helpers\ProcessHelper::getStatusLabel($process->status) }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                <!-- Çalışan Süreçler tablosu -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-tasks mr-1"></i>
+                            Çalışan Süreçler
+                        </h3>
                     </div>
-                @endif
+                    <div class="card-body">
+                        <table id="processes-table" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>PID</th>
+                                    <th>İsim</th>
+                                    <th>Kullanıcı</th>
+                                    <th>CPU %</th>
+                                    <th>Bellek %</th>
+                                    <th class="no-sort">
+                                        Durum
+                                        <select class="form-control form-control-sm mt-2" id="status-filter">
+                                            <option value="">Tümü</option>
+                                            @foreach(App\Helpers\ProcessHelper::getAllStatuses() as $value => $label)
+                                                <option value="{{ $value }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($lastSystemInfo->processInfo->processes as $process)
+                                    <tr>
+                                        <td>{{ $process->pid }}</td>
+                                        <td>{{ $process->name }}</td>
+                                        <td>{{ $process->username }}</td>
+                                        <td>{{ number_format($process->cpu_percent, 1) }}%</td>
+                                        <td>{{ number_format($process->memory_percent, 1) }}%</td>
+                                        <td>
+                                            <span class="badge badge-{{ App\Helpers\ProcessHelper::getStatusBadgeClass($process->status) }}" data-status="{{ $process->status }}">
+                                                <i class="fas fa-{{ App\Helpers\ProcessHelper::getStatusIcon($process->status) }}"></i>
+                                                {{ App\Helpers\ProcessHelper::getStatusLabel($process->status) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
             @else
                 <div class="alert alert-warning">
@@ -615,10 +587,36 @@
             });
 
             // Ana Processes tablosu
-            $('#processes-table').DataTable({
-                ...commonSettings,
-                order: [[4, 'desc']]
-            });
+            // Ana Processes tablosu
+$('#processes-table').DataTable({
+    language: {
+        url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+    },
+    pageLength: 10,
+    order: [[4, 'desc']], // Bellek kullanımına göre sırala
+    columnDefs: [
+        { 
+            orderable: false, 
+            targets: [5],
+            // Durum sütunu için özel arama fonksiyonu
+            render: function(data, type, row) {
+                if (type === 'filter') {
+                    // Filtreleme için data-status değerini kullan
+                    return $(data).attr('data-status');
+                }
+                return data;
+            }
+        }
+    ],
+    initComplete: function () {
+        // Status filtresi için event listener
+        $('#status-filter').on('change', function() {
+            let table = $('#processes-table').DataTable();
+            let val = $(this).val();
+            table.column(5).search(val).draw();
+        });
+    }
+});
 
             // CPU Processes Modal tablosu
             $('#cpu-processes-table').DataTable({
