@@ -15,6 +15,7 @@ use App\Models\UpdateInfo;
 use App\Models\UpdatePackage;
 use App\Models\ProcessInfo;
 use App\Models\Process;
+use App\Models\ResourceUsage;
 use Illuminate\Support\Facades\Log;
 
 class SystemInfoController extends Controller
@@ -162,6 +163,17 @@ class SystemInfoController extends Controller
 
                 Process::insert($processes);
             }
+
+            // Kaynak kullanımını kaydet
+            ResourceUsage::create([
+                'server_id' => $server->id,
+                'cpu_usage' => $validated['resources']['cpu']['usage_percent'],
+                'memory_usage' => $validated['resources']['memory']['usage_percent'],
+                'memory_total' => $validated['resources']['memory']['total_gb'],
+                'memory_used' => $validated['resources']['memory']['used_gb'],
+                'memory_free' => $validated['resources']['memory']['free_gb'],
+                'disk_usages' => $validated['resources']['disks']
+            ]);
 
             return response()->json([
                 'message' => 'System information updated successfully',

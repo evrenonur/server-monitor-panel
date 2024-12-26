@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\ServerController;
+use App\Http\Controllers\Admin\ServerUsageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,3 +41,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         'destroy' => 'admin.servers.destroy',
     ]);
 });
+
+Route::get('admin/servers/{server}/usage', [ServerUsageController::class, 'show'])->name('admin.servers.usage');
+Route::get('admin/servers/{server}/usage/data', [ServerUsageController::class, 'data'])->name('admin.servers.usage.data');

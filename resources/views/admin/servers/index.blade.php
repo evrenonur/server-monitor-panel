@@ -68,7 +68,10 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item" href="{{ route('admin.servers.show', $server) }}">
-                                            <i class="fas fa-eye"></i> Detay
+                                            <i class="fas fa-eye"></i> Detaylar
+                                        </a>
+                                        <a class="dropdown-item" href="{{ route('admin.servers.usage', $server) }}">
+                                            <i class="fas fa-chart-line"></i> Kullanım Detayları
                                         </a>
                                         <a class="dropdown-item" href="{{ route('admin.servers.edit', $server) }}">
                                             <i class="fas fa-edit"></i> Düzenle
