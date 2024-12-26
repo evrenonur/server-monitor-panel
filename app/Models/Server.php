@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Server extends Model
 {
@@ -13,33 +13,28 @@ class Server extends Model
         'ssh_port',
         'username',
         'password',
+        'api_key',
         'is_active'
     ];
 
-    protected $hidden = [
-        'password',
-        'api_key'
+    protected $casts = [
+        'is_active' => 'boolean',
+        'ssh_port' => 'integer'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($server) {
-            $server->api_key = Str::random(64);
-        });
-    }
-
-    public function getApiKeyAttribute($value)
-    {
-        if (auth()->check()) {
-            return $value;
-        }
-        return null;
-    }
-
-    public function systemInfos()
+    public function systemInfos(): HasMany
     {
         return $this->hasMany(SystemInfo::class);
+    }
+
+    public function resourceUsages(): HasMany
+    {
+        return $this->hasMany(ResourceUsage::class);
+    }
+
+    // API key oluşturma
+    public static function generateApiKey(): string
+    {
+        return bin2hex(random_bytes(32));
     }
 } 
