@@ -332,7 +332,7 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>{{ $process->status }}</td>
+                                            <td>{{ \App\Helpers\ProcessHelper::getStatusLabel($process->status) }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -528,54 +528,108 @@
             }, 1000);
         });
 
+        // DataTables ortak ayarlar
+        const commonSettings = {
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+            },
+            pageLength: 10,
+            columnDefs: [
+                { 
+                    targets: 5,
+                    orderable: false,
+                    render: function(data, type, row) {
+                        if (type === 'display') {
+                            var status = data;
+                            var badge = 'secondary';
+                            var icon = 'pause';
+                            var label = '';
+                            
+                            switch(status) {
+                                case 'running':
+                                    badge = 'success';
+                                    icon = 'play';
+                                    label = 'Çalışıyor';
+                                    break;
+                                case 'sleeping':
+                                    badge = 'secondary';
+                                    icon = 'pause';
+                                    label = 'Uyuyor';
+                                    break;
+                                case 'stopped':
+                                    badge = 'warning';
+                                    icon = 'stop';
+                                    label = 'Durmuş';
+                                    break;
+                                case 'zombie':
+                                    badge = 'danger';
+                                    icon = 'skull';
+                                    label = 'Zombi';
+                                    break;
+                                default:
+                                    label = status;
+                            }
+                            
+                            return '<span class="badge badge-' + badge + '">' +
+                                   '<i class="fas fa-' + icon + '"></i> ' +
+                                   label +
+                                   '</span>';
+                        }
+                        return data;
+                    }
+                }
+            ],
+            initComplete: function () {
+                // Status filtresi ekle
+                this.api().columns(5).every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control form-control-sm mt-2"><option value="">Tüm Durumlar</option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+
+                    var statuses = ['running', 'sleeping', 'stopped', 'zombie'];
+                    var statusLabels = {
+                        'running': 'Çalışıyor',
+                        'sleeping': 'Uyuyor',
+                        'stopped': 'Durmuş',
+                        'zombie': 'Zombi'
+                    };
+
+                    statuses.forEach(function(status) {
+                        select.append('<option value="' + status + '">' + statusLabels[status] + '</option>');
+                    });
+                });
+            }
+        };
+
         // DataTables
         $(document).ready(function() {
             // Updates tablosu
             $('#updates-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
-                },
-                pageLength: 10,
+                ...commonSettings,
                 order: [[0, 'asc']],
-                columnDefs: [
-                    { orderable: false, targets: [] }
-                ]
+                columnDefs: [{ orderable: false, targets: [] }]
             });
 
             // Ana Processes tablosu
             $('#processes-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
-                },
-                pageLength: 10,
-                order: [[4, 'desc']], 
-                columnDefs: [
-                    { orderable: false, targets: [5] }
-                ]
+                ...commonSettings,
+                order: [[4, 'desc']]
             });
 
             // CPU Processes Modal tablosu
             $('#cpu-processes-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
-                },
-                pageLength: 10,
-                order: [[3, 'desc']], // CPU kullanımına göre sırala
-                columnDefs: [
-                    { orderable: false, targets: [5] }
-                ]
+                ...commonSettings,
+                order: [[3, 'desc']] // CPU kullanımına göre sırala
             });
 
             // Memory Processes Modal tablosu
             $('#memory-processes-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
-                },
-                pageLength: 10,
-                order: [[4, 'desc']], // Bellek kullanımına göre sırala
-                columnDefs: [
-                    { orderable: false, targets: [5] }
-                ]
+                ...commonSettings,
+                order: [[4, 'desc']] // Bellek kullanımına göre sırala
             });
 
             // Modal açıldığında DataTables yeniden çiz
