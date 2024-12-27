@@ -73,6 +73,9 @@
                                         <a class="dropdown-item" href="{{ route('admin.servers.usage', $server) }}">
                                             <i class="fas fa-chart-line"></i> Kullanım Detayları
                                         </a>
+                                        <a class="dropdown-item" href="{{ route('admin.servers.ssh', $server) }}">
+                                            <i class="fas fa-terminal"></i> SSH Bağlantısı
+                                        </a>
                                         <a class="dropdown-item" href="{{ route('admin.servers.edit', $server) }}">
                                             <i class="fas fa-edit"></i> Düzenle
                                         </a>
@@ -104,4 +107,4 @@
     <script>
         new ClipboardJS('.copy-btn');
     </script>
-@stop 
+@stop

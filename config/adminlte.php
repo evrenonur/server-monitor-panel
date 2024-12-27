@@ -52,7 +52,7 @@ return [
 
     'menu' => [
         [
-            'text' => 'Dashboard',
+            'text' => 'Anasayfa',
             'url'  => 'admin/dashboard',
             'icon' => 'fas fa-fw fa-tachometer-alt',
         ],

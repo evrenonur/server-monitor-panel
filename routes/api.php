@@ -14,5 +14,10 @@ use App\Http\Controllers\Api\SystemInfoController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
+Route::get('/validate-token', function (Request $request) {
+    $token = str_replace('Bearer ', '', $request->header('Authorization'));
+    return response()->json([
+        'valid' => \App\Models\User::where('api_token', $token)->exists()
+    ]);
+})->middleware('api');
 Route::post('/system-info', [SystemInfoController::class, 'store']);

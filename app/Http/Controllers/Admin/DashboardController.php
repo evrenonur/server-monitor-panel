@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Server;
 use App\Models\ResourceUsage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -25,7 +26,7 @@ class DashboardController extends Controller
                 $query->where('cpu_usage', '>=', 80)
                     ->orWhere('memory_usage', '>=', 80);
             })
-            ->select('server_id', 
+            ->select('server_id',
                 DB::raw('MAX(cpu_usage) as max_cpu'),
                 DB::raw('MAX(memory_usage) as max_memory'),
                 DB::raw('COUNT(*) as alert_count')
@@ -68,4 +69,4 @@ class DashboardController extends Controller
             'averageUsage'
         ));
     }
-} 
+}

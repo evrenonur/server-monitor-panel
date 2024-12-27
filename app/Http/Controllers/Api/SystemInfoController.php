@@ -70,6 +70,7 @@ class SystemInfoController extends Controller
                     'mac_address' => $interface['mac']
                 ];
             })->values()->all();
+
             NetworkInterface::insert($networkInterfaces);
 
             // CPU bilgilerini güncelle veya oluştur

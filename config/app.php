@@ -212,4 +212,10 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
+    'websocket_port' => env('WEBSOCKET_PORT', 8090),
+    'websocket_host' => env('WEBSOCKET_HOST', '0.0.0.0'),
+    'websocket_ssl_enabled' => env('WEBSOCKET_SSL_ENABLED', false),
+    'ssl_cert_path' => env('SSL_CERT_PATH'),
+    'ssl_key_path' => env('SSL_KEY_PATH'),
+
 ];

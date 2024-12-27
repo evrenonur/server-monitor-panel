@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\ServerController;
 use App\Http\Controllers\Admin\ServerUsageController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ServerSshController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         'update' => 'admin.users.update',
         'destroy' => 'admin.users.destroy',
     ]);
+
+    Route::get('servers/{server}/ssh', [ServerSshController::class, 'show'])->name('admin.servers.ssh');
 });
 
 Route::get('admin/servers/{server}/usage', [ServerUsageController::class, 'show'])->name('admin.servers.usage');

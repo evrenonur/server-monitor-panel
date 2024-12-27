@@ -19,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // WebSocket ayarlarını config'e ekle
+        config([
+            'app.websocket_host' => env('WEBSOCKET_HOST', '127.0.0.1'),
+            'app.websocket_port' => env('WEBSOCKET_PORT', 8090),
+            'app.websocket_secure' => env('WEBSOCKET_SECURE', false)
+        ]);
     }
 }
