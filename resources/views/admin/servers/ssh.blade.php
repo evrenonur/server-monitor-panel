@@ -10,7 +10,7 @@
             {{ $server->name }}
         </h1>
         <div>
-            <button class="btn btn-primary mr-2" onclick="toggleFullscreen()">
+            <button class="btn btn-primary mr-2 btn-fullscreen" onclick="toggleFullscreen()">
                 <i class="fas fa-expand"></i> Tam Ekran
             </button>
             <a href="{{ route('admin.servers.index') }}" class="btn btn-secondary">
@@ -186,7 +186,19 @@ function copySSHCommand() {
 // Tam Ekran Modu
 function toggleFullscreen() {
     const terminal = document.getElementById('terminal');
+    const button = document.querySelector('.btn-fullscreen');
+
     terminal.classList.toggle('fullscreen');
+
+    // Buton ikonunu ve metnini güncelle
+    if (terminal.classList.contains('fullscreen')) {
+        button.innerHTML = '<i class="fas fa-compress"></i> Küçült';
+        button.classList.replace('btn-primary', 'btn-warning');
+    } else {
+        button.innerHTML = '<i class="fas fa-expand"></i> Tam Ekran';
+        button.classList.replace('btn-warning', 'btn-primary');
+    }
+
     fitAddon.fit();
 }
 
@@ -289,10 +301,13 @@ window.addEventListener('resize', () => {
     }));
 });
 
-// ESC tuşu ile tam ekrandan çık
+// ESC tuşu ve buton sınıfı ekle
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.getElementById('terminal').classList.contains('fullscreen')) {
-        toggleFullscreen();
+    if (e.key === 'Escape') {
+        const terminal = document.getElementById('terminal');
+        if (terminal.classList.contains('fullscreen')) {
+            toggleFullscreen();
+        }
     }
 });
 </script>

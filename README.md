@@ -13,6 +13,8 @@ Bu platform, sunucularınızı gerçek zamanlı olarak izlemenizi ve yönetmeniz
 * **⚙️ Servisler**: Servisleri görüntüleyin ve yönetin
 * **🔄 Güncellemeler**: Sistem güncellemelerini takip edin
 * **📈 Metrikler**: Detaylı performans grafikleri ve raporlar
+* **🔐 Güvenlik**: Token tabanlı kimlik doğrulama ve yetkilendirme
+* **🔄 WebSocket**: Sunucularınızı gerçek zamanlı olarak izlemek için WebSocket kullanıyoruz
 
 ## 🛠️ Teknolojiler
 
@@ -21,13 +23,23 @@ Bu platform, sunucularınızı gerçek zamanlı olarak izlemenizi ve yönetmeniz
 * AdminLTE
 * Chart.js
 * DataTables
+* WebSocket
+* Node.js
+* WebSSH2
+
+
 
 ## ⚙️ API Endpointleri
 
 **POST** `/api/system-info`
 Sistem bilgilerini kaydetmek için kullanılır. Authorization header'ında API key gereklidir.
 
-## 🚀 Kurulum
+**GET** `/api/validate-token`
+Token doğrulama için kullanılır. Authorization header'ında token gereklidir.
+
+
+
+## 🚀 Kurulum Laravel
 
 1. `git clone [proje-url]` - Projeyi yerel makinenize klonlayın
 2. `composer install` - Gerekli bağımlılıkları yükleyin
@@ -37,6 +49,10 @@ Sistem bilgilerini kaydetmek için kullanılır. Authorization header'ında API 
 6. `/admin/login` - Admin paneline giriş yapın
    * Kullanıcı Adı: **admin@admin.com**
    * Şifre: **password**
+
+## 🚀 Kurulum Node.js
+2. `npm install` - Gerekli bağımlılıkları yükleyin
+3. `node websocket-server.js` - WebSocket sunucusunu başlatın
 
 ## 📝 Lisans
 
