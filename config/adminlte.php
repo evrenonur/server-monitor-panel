@@ -61,5 +61,10 @@ return [
             'url'  => 'admin/servers',
             'icon' => 'fas fa-fw fa-server',
         ],
+        [
+            'text' => 'Kullanıcılar',
+            'url'  => 'admin/users',
+            'icon' => 'fas fa-users',
+        ],
     ],
-]; 
+];

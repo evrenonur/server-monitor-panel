@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\ServerController;
 use App\Http\Controllers\Admin\ServerUsageController;
+use App\Http\Controllers\Admin\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +30,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Admin routes
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
-    
+
     // Server routes
     Route::resource('servers', ServerController::class)->names([
         'index' => 'admin.servers.index',
@@ -39,6 +40,16 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         'edit' => 'admin.servers.edit',
         'update' => 'admin.servers.update',
         'destroy' => 'admin.servers.destroy',
+    ]);
+
+    // User routes
+    Route::resource('users', UserController::class)->names([
+        'index' => 'admin.users.index',
+        'create' => 'admin.users.create',
+        'store' => 'admin.users.store',
+        'edit' => 'admin.users.edit',
+        'update' => 'admin.users.update',
+        'destroy' => 'admin.users.destroy',
     ]);
 });
 
