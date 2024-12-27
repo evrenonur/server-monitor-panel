@@ -1,12 +1,23 @@
 const WebSocket = require('ws');
 const { Client } = require('ssh2');
+const axios = require('axios');
 
 const wss = new WebSocket.Server({ port: 8090 });
 const sessions = new Map();
 
-wss.on('connection', (ws, req) => {
+async function validateToken(token) {
+    try {
+        const response = await axios.get('http://localhost/api/validate-token', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.data.valid;
+    } catch (error) {
+        console.error('Token validation error:', error.message);
+        return false;
+    }
+}
 
-    const token = req.url.split('=')[1];
+wss.on('connection', (ws, req) => {
     console.log('New connection');
 
     ws.on('message', async (message) => {
@@ -14,6 +25,8 @@ wss.on('connection', (ws, req) => {
 
         switch (data.type) {
             case 'connect':
+                const token = req.url.split('=')[1];
+                data.token = token;
                 handleConnect(ws, data);
                 break;
             case 'input':
@@ -35,53 +48,72 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-function handleConnect(ws, data) {
-    const client = new Client();
+async function handleConnect(ws, data) {
+    try {
+        const isValid = await validateToken(data.token);
+        if (!isValid) {
+            ws.send(JSON.stringify({
+                type: 'error',
+                message: 'Unauthorized: Invalid token'
+            }));
+            ws.close();
+            return;
+        }
 
-    client.on('ready', () => {
-        client.shell({
-            term: 'xterm-256color',
-            cols: data.cols || 80,
-            rows: data.rows || 24
-        }, (err, stream) => {
-            if (err) {
-                ws.send(JSON.stringify({
-                    type: 'error',
-                    message: 'Shell açılamadı!'
-                }));
-                return;
-            }
+        const client = new Client();
 
-            sessions.set(ws, { client, stream });
+        client.on('ready', () => {
+            client.shell({
+                term: 'xterm-256color',
+                cols: data.cols || 80,
+                rows: data.rows || 24
+            }, (err, stream) => {
+                if (err) {
+                    ws.send(JSON.stringify({
+                        type: 'error',
+                        message: 'Shell açılamadı!'
+                    }));
+                    return;
+                }
 
-            stream.on('data', (data) => {
-                ws.send(JSON.stringify({
-                    type: 'output',
-                    data: data.toString('utf8')
-                }));
+                sessions.set(ws, { client, stream });
+
+                stream.on('data', (data) => {
+                    ws.send(JSON.stringify({
+                        type: 'output',
+                        data: data.toString('utf8')
+                    }));
+                });
+
+                stream.on('close', () => {
+                    ws.close();
+                });
+
+                ws.send(JSON.stringify({ type: 'connected' }));
             });
-
-            stream.on('close', () => {
-                ws.close();
-            });
-
-            ws.send(JSON.stringify({ type: 'connected' }));
         });
-    });
 
-    client.on('error', (err) => {
+        client.on('error', (err) => {
+            ws.send(JSON.stringify({
+                type: 'error',
+                message: 'Bağlantı hatası: ' + err.message
+            }));
+        });
+
+        client.connect({
+            host: data.host,
+            port: data.port,
+            username: data.username,
+            password: data.password
+        });
+
+    } catch (error) {
         ws.send(JSON.stringify({
             type: 'error',
-            message: 'Bağlantı hatası: ' + err.message
+            message: 'Connection error: ' + error.message
         }));
-    });
-
-    client.connect({
-        host: data.host,
-        port: data.port,
-        username: data.username,
-        password: data.password
-    });
+        ws.close();
+    }
 }
 
 function handleInput(ws, data) {

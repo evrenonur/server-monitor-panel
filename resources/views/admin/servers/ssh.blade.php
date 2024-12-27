@@ -247,7 +247,6 @@ ws.onclose = () => {
 };
 
 ws.onopen = () => {
-    term.write('\r\n\x1b[32mBağlantı kuruldu...\x1b[0m\r\n');
 
     ws.send(JSON.stringify({
         type: 'connect',
