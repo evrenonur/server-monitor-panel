@@ -10,6 +10,7 @@ Bu platform, sunucularınızı gerçek zamanlı olarak izlemenizi ve yönetmeniz
 
 * **📊 Kaynak İzleme**: CPU, RAM ve Disk kullanımını gerçek zamanlı takip edin
 * **⚡ Süreç Yönetimi**: Çalışan süreçleri görüntüleyin ve yönetin
+* **⚙️ Servisler**: Servisleri görüntüleyin ve yönetin
 * **🔄 Güncellemeler**: Sistem güncellemelerini takip edin
 * **📈 Metrikler**: Detaylı performans grafikleri ve raporlar
 
