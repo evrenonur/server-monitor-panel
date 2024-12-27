@@ -24,10 +24,10 @@ class StoreSystemInfoRequest extends FormRequest
             'system.architecture' => 'required|string',
             'system.processor' => 'required|string',
             'system.python_version' => 'required|string',
-            
+
             'network' => 'required|array',
             'network.interfaces' => 'required|array',
-            
+
             'resources' => 'required|array',
             'resources.cpu' => 'required|array',
             'resources.cpu.cores' => 'required|integer',
@@ -38,9 +38,9 @@ class StoreSystemInfoRequest extends FormRequest
             'resources.memory.free_gb' => 'required|numeric',
             'resources.memory.usage_percent' => 'required|numeric',
             'resources.disks' => 'required|array',
-            
+
             'timestamp' => 'required|string',
-            
+
             'updates' => 'nullable|array',
             'updates.count' => 'nullable|integer',
             'updates.packages' => 'nullable|array',
@@ -64,7 +64,22 @@ class StoreSystemInfoRequest extends FormRequest
             'processes.processes.*.username' => 'required|string',
             'processes.processes.*.cpu_percent' => 'required|numeric',
             'processes.processes.*.memory_percent' => 'required|numeric',
-            'processes.processes.*.status' => 'required|string|in:running,sleeping,stopped,zombie'
+            'processes.processes.*.status' => 'required|string|in:running,sleeping,stopped,zombie',
+
+            'services' => 'nullable|array',
+            'services.services' => 'nullable|array',
+            'services.services.*.name' => 'required|string',
+            'services.services.*.load_state' => 'required|string',
+            'services.services.*.active_state' => 'required|string',
+            'services.services.*.sub_state' => 'required|string',
+            'services.services.*.description' => 'nullable|string',
+            'services.services.*.main_pid' => 'required|string',
+            'services.services.*.load_error' => 'nullable|string',
+            'services.services.*.fragment_path' => 'nullable|string',
+            'services.stats' => 'required|array',
+            'services.stats.active' => 'required|integer',
+            'services.stats.inactive' => 'required|integer',
+            'services.stats.failed' => 'required|integer'
         ];
     }
 
@@ -106,7 +121,16 @@ class StoreSystemInfoRequest extends FormRequest
             'processes.processes.*.cpu_percent.required' => 'CPU kullanım yüzdesi gereklidir',
             'processes.processes.*.memory_percent.required' => 'Bellek kullanım yüzdesi gereklidir',
             'processes.processes.*.status.required' => 'Süreç durumu gereklidir',
-            'processes.processes.*.status.in' => 'Geçersiz süreç durumu'
+            'processes.processes.*.status.in' => 'Geçersiz süreç durumu',
+            'services.required' => 'Servis bilgileri gereklidir',
+            'services.services.*.name.required' => 'Servis adı gereklidir',
+            'services.services.*.load_state.required' => 'Servis yükleme durumu gereklidir',
+            'services.services.*.active_state.required' => 'Servis aktiflik durumu gereklidir',
+            'services.services.*.sub_state.required' => 'Servis alt durumu gereklidir',
+            'services.services.*.main_pid.required' => 'Servis PID bilgisi gereklidir',
+            'services.stats.active.required' => 'Aktif servis sayısı gereklidir',
+            'services.stats.inactive.required' => 'Pasif servis sayısı gereklidir',
+            'services.stats.failed.required' => 'Hatalı servis sayısı gereklidir'
         ];
     }
-} 
+}

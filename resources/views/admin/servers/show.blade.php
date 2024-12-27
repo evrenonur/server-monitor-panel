@@ -25,7 +25,7 @@
             @if($lastSystemInfo = $server->systemInfos()->with(['operatingSystem', 'cpuInfo', 'memoryInfo', 'diskInfos', 'updateInfo.packages'])->latest()->first())
                 <!-- Sistem Bilgileri -->
                 <div class="row">
-                   
+
                     <!-- Sunucu Bilgileri -->
                     <div class="col-md-3">
                         <div class="small-box bg-white">
@@ -33,7 +33,7 @@
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-info-circle fa-2x text-primary mr-2"></i>
                                     <h5 class="mb-0">Sunucu Bilgileri</h5>
-                                </div>  
+                                </div>
                                 <p class="mb-1"><strong>IP:</strong> {{ $server->ip_address }}</p>
                                 <p class="mb-1"><strong>Port:</strong> {{ $server->ssh_port }}</p>
                                 <p class="mb-1"><strong>Kullanıcı:</strong> {{ $server->username }}</p>
@@ -117,7 +117,7 @@
                                     </div>
                                 </div>
                                 <p class="mt-2 mb-0">
-                                    {{ number_format($lastSystemInfo->memoryInfo->used_gb, 1) }} GB / 
+                                    {{ number_format($lastSystemInfo->memoryInfo->used_gb, 1) }} GB /
                                     {{ number_format($lastSystemInfo->memoryInfo->total_gb, 1) }} GB
                                 </p>
                                 <button type="button" class="btn btn-sm btn-outline-warning mt-2" data-toggle="modal" data-target="#memoryProcessesModal">
@@ -204,7 +204,7 @@
                                             <td>{{ number_format($disk->free_gb, 1) }} GB</td>
                                             <td>
                                                 <div class="progress" style="height: 4px;">
-                                                    <div class="progress-bar bg-{{ $disk->usage_percent > 90 ? 'danger' : ($disk->usage_percent > 70 ? 'warning' : 'success') }}" 
+                                                    <div class="progress-bar bg-{{ $disk->usage_percent > 90 ? 'danger' : ($disk->usage_percent > 70 ? 'warning' : 'success') }}"
                                                          style="width: {{ $disk->usage_percent }}%">
                                                     </div>
                                                 </div>
@@ -361,7 +361,7 @@
                                     </td>
                                     <td>
                                         <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-success" 
+                                            <div class="progress-bar bg-success"
                                                  style="width: {{ $process->cpu_percent }}%"
                                                  title="{{ number_format($process->cpu_percent, 1) }}%">
                                                 {{ number_format($process->cpu_percent, 1) }}%
@@ -419,7 +419,7 @@
                                     <td>{{ number_format($process->cpu_percent, 1) }}%</td>
                                     <td>
                                         <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-warning" 
+                                            <div class="progress-bar bg-warning"
                                                  style="width: {{ $process->memory_percent }}%"
                                                  title="{{ number_format($process->memory_percent, 1) }}%">
                                                 {{ number_format($process->memory_percent, 1) }}%
@@ -435,6 +435,72 @@
             </div>
         </div>
     </div>
+
+    <!-- Servisler -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-cogs mr-1"></i>
+                Servisler
+            </h3>
+        </div>
+        <div class="card-body">
+            <table id="services-table" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Servis</th>
+                        <th>
+                            Durum
+                            <select class="form-control form-control-sm mt-2" id="status-filter-services">
+                                <option value="">Tümü</option>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Pasif</option>
+                                <option value="activating">Etkinleştiriliyor</option>
+                                <option value="deactivating">Devre dışı bırakılıyor</option>
+                                <option value="failed">Başarısız</option>
+                            </select>
+                        </th>
+                        <th>Alt Durum</th>
+                        <th>PID</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($services as $service)
+                    <tr>
+                        <td>{{ $service->name }}</td>
+                        <td>
+                            @php
+                                $badge = match($service->active_state) {
+                                    'active' => 'success',
+                                    'inactive' => 'secondary',
+                                    'activating' => 'info',
+                                    'deactivating' => 'warning',
+                                    'failed' => 'danger',
+                                    default => 'light'
+                                };
+
+                                $label = match($service->active_state) {
+                                    'active' => 'Aktif',
+                                    'inactive' => 'Pasif',
+                                    'activating' => 'Etkinleştiriliyor',
+                                    'deactivating' => 'Devre Dışı Bırakılıyor',
+                                    'failed' => 'Başarısız',
+                                    default => $service->active_state
+                                };
+                            @endphp
+                            <span class="badge badge-{{ $badge }}" data-status="{{ $service->active_state }}">{{ $label }}</span>
+                        </td>
+                        <td>{{ $service->sub_state }}</td>
+                        <td>{{ $service->main_pid }}</td>
+                        <td>{{ $service->description }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 @stop
 
 @section('css')
@@ -487,14 +553,14 @@
     <script>
         // Clipboard.js
         new ClipboardJS('.copy-btn');
-        
+
         // Kopyalama başarılı bildirimi
         $('.copy-btn').on('click', function() {
             $(this).tooltip({
                 title: 'Kopyalandı!',
                 trigger: 'manual'
             }).tooltip('show');
-            
+
             setTimeout(() => {
                 $(this).tooltip('hide');
             }, 1000);
@@ -507,7 +573,7 @@
             },
             pageLength: 10,
             columnDefs: [
-                { 
+                {
                     targets: 5,
                     orderable: false,
                     render: function(data, type, row) {
@@ -516,7 +582,7 @@
                             var badge = 'secondary';
                             var icon = 'pause';
                             var label = '';
-                            
+
                             switch(status) {
                                 case 'running':
                                     badge = 'success';
@@ -541,7 +607,7 @@
                                 default:
                                     label = status;
                             }
-                            
+
                             return '<span class="badge badge-' + badge + '">' +
                                    '<i class="fas fa-' + icon + '"></i> ' +
                                    label +
@@ -595,8 +661,8 @@ $('#processes-table').DataTable({
     pageLength: 10,
     order: [[4, 'desc']], // Bellek kullanımına göre sırala
     columnDefs: [
-        { 
-            orderable: false, 
+        {
+            orderable: false,
             targets: [5],
             // Durum sütunu için özel arama fonksiyonu
             render: function(data, type, row) {
@@ -637,5 +703,37 @@ $('#processes-table').DataTable({
                     .responsive.recalc();
             });
         });
+
+        let servicesTable = $('#services-table').DataTable({
+    language: {
+        url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+    },
+    pageLength: 10,
+    order: [[0, 'asc']],
+    columnDefs: [{
+        targets: 1,
+        orderable: false,
+        render: function(data, type, row) {
+            if (type === 'filter') {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+                const statusSpan = tempDiv.querySelector('span');
+                return statusSpan ? statusSpan.getAttribute('data-status') : '';
+            }
+            return data;
+        }
+    }]
+});
+
+// Status filter event handler
+$('#status-filter-services').on('change', function() {
+    const selectedStatus = $(this).val();
+    if (selectedStatus === '') {
+        servicesTable.column(1).search('').draw(); // Boş değer için tüm kayıtları göster
+    } else {
+        servicesTable.column(1).search('^' + selectedStatus + '$', true, false).draw();
+    }
+});
+
     </script>
-@stop 
+@stop

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Server;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class ServerController extends Controller
@@ -72,6 +73,11 @@ class ServerController extends Controller
 
     public function show(Server $server)
     {
-        return view('admin.servers.show', compact('server'));
+        $services = Service::where('server_id', $server->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(1000) // Son 1000 kayıt
+            ->get();
+
+        return view('admin.servers.show', compact('server', 'services'));
     }
-} 
+}

@@ -16,6 +16,7 @@ use App\Models\UpdatePackage;
 use App\Models\ProcessInfo;
 use App\Models\Process;
 use App\Models\ResourceUsage;
+use App\Models\Service;
 use Illuminate\Support\Facades\Log;
 
 class SystemInfoController extends Controller
@@ -164,6 +165,26 @@ class SystemInfoController extends Controller
                 Process::insert($processes);
             }
 
+            // Servisleri kaydet
+            if (isset($validated['services'])) {
+                $services = collect($validated['services']['services'])->map(function ($service) use ($server) {
+                    return [
+                        'server_id' => $server->id,
+                        'name' => $service['name'],
+                        'load_state' => $service['load_state'],
+                        'active_state' => $service['active_state'],
+                        'sub_state' => $service['sub_state'],
+                        'description' => $service['description'],
+                        'main_pid' => $service['main_pid'],
+                        'load_error' => $service['load_error'],
+                        'fragment_path' => $service['fragment_path'],
+                        'created_at' => now()
+                    ];
+                })->all();
+                Service::where('server_id', $server->id)->delete();
+                Service::insert($services);
+            }
+
             // Kaynak kullanımını kaydet
             ResourceUsage::create([
                 'server_id' => $server->id,
@@ -195,4 +216,4 @@ class SystemInfoController extends Controller
             ], 500);
         }
     }
-} 
+}
