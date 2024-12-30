@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ServerController;
 use App\Http\Controllers\Admin\ServerUsageController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ServerSshController;
+use App\Http\Controllers\Admin\ServerUpdateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,32 +30,22 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Admin routes
-Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Server routes
-    Route::resource('servers', ServerController::class)->names([
-        'index' => 'admin.servers.index',
-        'create' => 'admin.servers.create',
-        'store' => 'admin.servers.store',
-        'show' => 'admin.servers.show',
-        'edit' => 'admin.servers.edit',
-        'update' => 'admin.servers.update',
-        'destroy' => 'admin.servers.destroy',
-    ]);
+    Route::resource('servers', ServerController::class);
 
     // User routes
-    Route::resource('users', UserController::class)->names([
-        'index' => 'admin.users.index',
-        'create' => 'admin.users.create',
-        'store' => 'admin.users.store',
-        'edit' => 'admin.users.edit',
-        'update' => 'admin.users.update',
-        'destroy' => 'admin.users.destroy',
-    ]);
+    Route::resource('users', UserController::class);
 
-    Route::get('servers/{server}/ssh', [ServerSshController::class, 'show'])->name('admin.servers.ssh');
+    // Server SSH route
+    Route::get('servers/{server}/ssh', [ServerSshController::class, 'show'])->name('servers.ssh');
+
+    // Server update route
+    Route::post('servers/{server}/update', [ServerUpdateController::class, 'update'])->name('servers.update');
+
+    // Server usage routes
+    Route::get('servers/{server}/usage', [ServerUsageController::class, 'show'])->name('servers.usage');
+    Route::get('servers/{server}/usage/data', [ServerUsageController::class, 'data'])->name('servers.usage.data');
 });
-
-Route::get('admin/servers/{server}/usage', [ServerUsageController::class, 'show'])->name('admin.servers.usage');
-Route::get('admin/servers/{server}/usage/data', [ServerUsageController::class, 'data'])->name('admin.servers.usage.data');
