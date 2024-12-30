@@ -11,6 +11,7 @@ class Server extends Model
         'name',
         'ip_address',
         'ssh_port',
+        'ws_port',
         'username',
         'password',
         'api_key',
@@ -37,4 +38,4 @@ class Server extends Model
     {
         return bin2hex(random_bytes(32));
     }
-} 
+}

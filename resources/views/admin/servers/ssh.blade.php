@@ -332,7 +332,7 @@ class SSHConnection {
 
     connect() {
         const protocol = this.config.secure ? 'wss' : 'ws';
-        const url = `${protocol}://${this.config.host}:${this.config.port}?token=${this.config.token}`;
+        const url = `${protocol}://${this.config.host}:8090?token=${this.config.token}`;
 
         this.ws = new WebSocket(url);
         this.setupEventListeners();
