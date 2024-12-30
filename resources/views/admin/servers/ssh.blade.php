@@ -122,11 +122,16 @@
 @section('css')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.19.0/css/xterm.css">
 <style>
+    /* Terminal Container */
     #terminal {
-        height: 500px;
+        height: calc(100vh - 300px);
+        min-height: 500px;
         background: #000;
         padding: 10px;
+        border-radius: 0 0 4px 4px;
     }
+
+    /* Tam Ekran Modu */
     #terminal.fullscreen {
         position: fixed;
         top: 0;
@@ -135,16 +140,91 @@
         height: 100vh;
         z-index: 9999;
         padding: 20px;
+        border-radius: 0;
     }
+
+    /* Terminal Card */
+    .terminal-card {
+        margin-bottom: 0;
+        border: none;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .terminal-card .card-header {
+        background-color: #343a40;
+        border-bottom: 1px solid #444;
+        padding: 0.75rem 1rem;
+    }
+
+    .terminal-card .card-body {
+        padding: 0;
+        background: #000;
+    }
+
+    /* Terminal Araçları */
+    .terminal-tools {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .terminal-tools .btn-tool {
+        color: #fff;
+        padding: 5px 10px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 4px;
+        margin-left: 5px;
+        transition: all 0.2s;
+    }
+
+    .terminal-tools .btn-tool:hover {
+        background: rgba(255,255,255,0.2);
+    }
+
+    /* Bilgi Kutuları */
+    .info-box {
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        min-height: 90px;
+    }
+
+    .info-box-content {
+        padding: 15px;
+    }
+
     .info-box-number {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 600;
+        margin-top: 5px;
     }
-    .card-header .btn-tool {
-        margin-left: 0.5rem;
+
+    /* SSH Komut Alanı */
+    .ssh-command {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 10px;
+        margin-top: 10px;
     }
-    .bg-dark {
-        background-color: #343a40 !important;
+
+    .ssh-command .input-group-text {
+        background-color: #343a40;
+        color: #fff;
+        border: none;
+    }
+
+    .ssh-command .form-control {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        font-family: monospace;
+    }
+
+    /* Uyarı Mesajları */
+    #copyAlert {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
     }
 </style>
 @stop
@@ -239,69 +319,148 @@ term.loadAddon(fitAddon);
 term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
-// WebSocket Bağlantısı
-const protocol = '{{ config('app.env') === 'production' ? 'wss' : 'ws' }}';
-const wsHost = '{{ config('app.websocket_host', '127.0.0.1') }}';
-const wsPort = {{ config('app.websocket_port', 8090) }};
-
-const ws = new WebSocket(
-    `${protocol}://${wsHost}:${wsPort}?token={{ auth()->user()->api_token }}`
-);
-
-// Bağlantı durumunu kontrol et
-ws.onerror = (error) => {
-    term.write('\r\n\x1b[31mWebSocket bağlantı hatası!\x1b[0m\r\n');
-    console.error('WebSocket error:', error);
-};
-
-ws.onclose = () => {
-    term.write('\r\n\x1b[31mBağlantı kapandı!\x1b[0m\r\n');
-};
-
-ws.onopen = () => {
-
-    ws.send(JSON.stringify({
-        type: 'connect',
-        host: '{{ $server->ip_address }}',
-        port: {{ $server->ssh_port ?? 22 }},
-        username: '{{ $server->username }}',
-        password: '{{ $server->password }}',
-        cols: term.cols,
-        rows: term.rows
-    }));
-};
-
-ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-
-    switch (data.type) {
-        case 'output':
-            term.write(data.data);
-            break;
-        case 'error':
-            term.write('\r\n\x1b[31m' + data.message + '\x1b[0m\r\n');
-            break;
+// WebSocket bağlantı yönetimi
+class SSHConnection {
+    constructor(terminal, config) {
+        this.term = terminal;
+        this.config = config;
+        this.ws = null;
+        this.connected = false;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 3;
     }
+
+    connect() {
+        const protocol = this.config.secure ? 'wss' : 'ws';
+        const url = `${protocol}://${this.config.host}:${this.config.port}?token=${this.config.token}`;
+
+        this.ws = new WebSocket(url);
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        // Bağlantı açıldığında
+        this.ws.onopen = () => {
+            this.connected = true;
+            this.reconnectAttempts = 0;
+            this.term.write('\r\n\x1b[32mBağlantı kuruldu...\x1b[0m\r\n');
+
+            // SSH bağlantı bilgilerini gönder
+            this.ws.send(JSON.stringify({
+                type: 'connect',
+                host: this.config.sshHost,
+                port: this.config.sshPort,
+                username: this.config.username,
+                password: this.config.password,
+                cols: this.term.cols,
+                rows: this.term.rows
+            }));
+        };
+
+        // Mesaj alındığında
+        this.ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                switch (data.type) {
+                    case 'output':
+                        this.term.write(data.data);
+                        break;
+                    case 'error':
+                        this.term.write('\r\n\x1b[31m' + data.message + '\x1b[0m\r\n');
+                        break;
+                    case 'connected':
+                        this.term.write('\r\n\x1b[32mSSH bağlantısı hazır...\x1b[0m\r\n');
+                        break;
+                }
+            } catch (error) {
+                console.error('Message parsing error:', error);
+            }
+        };
+
+        // Bağlantı hatası
+        this.ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            this.term.write('\r\n\x1b[31mBağlantı hatası!\x1b[0m\r\n');
+            this.tryReconnect();
+        };
+
+        // Bağlantı kapandığında
+        this.ws.onclose = () => {
+            this.connected = false;
+            this.term.write('\r\n\x1b[31mBağlantı kapandı!\x1b[0m\r\n');
+            this.tryReconnect();
+        };
+
+        // Terminal input
+        this.term.onData(data => {
+            if (this.connected && this.ws.readyState === WebSocket.OPEN) {
+                this.ws.send(JSON.stringify({
+                    type: 'input',
+                    input: data
+                }));
+            }
+        });
+
+        // Terminal boyut değişimi
+        this.handleResize();
+    }
+
+    handleResize() {
+        const resizeHandler = () => {
+            if (this.connected && this.ws.readyState === WebSocket.OPEN) {
+                this.ws.send(JSON.stringify({
+                    type: 'resize',
+                    cols: this.term.cols,
+                    rows: this.term.rows
+                }));
+            }
+        };
+
+        window.addEventListener('resize', () => {
+            fitAddon.fit();
+            resizeHandler();
+        });
+    }
+
+    tryReconnect() {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.reconnectAttempts++;
+            this.term.write(`\r\n\x1b[33mYeniden bağlanılıyor (${this.reconnectAttempts}/${this.maxReconnectAttempts})...\x1b[0m\r\n`);
+            setTimeout(() => this.connect(), 2000);
+        } else {
+            this.term.write('\r\n\x1b[31mBağlantı kurulamadı! Sayfayı yenileyin.\x1b[0m\r\n');
+        }
+    }
+
+    disconnect() {
+        if (this.ws) {
+            this.ws.close();
+        }
+    }
+}
+
+// Terminal ve bağlantı yapılandırması
+const terminalConfig = {
+    secure: false,
+    host: '{{ config('app.websocket_host', 'localhost') }}',
+    port: {{ config('app.websocket_port', 8090) }},
+    token: '{{ auth()->user()->api_token }}',
+    sshHost: '{{ $server->ip_address }}',
+    sshPort: {{ $server->ssh_port ?? 22 }},
+    username: '{{ $server->username }}',
+    password: '{{ $server->password }}'
 };
 
-term.onData(data => {
-    ws.send(JSON.stringify({
-        type: 'input',
-        input: data
-    }));
+// Terminal bağlantısını başlat
+const sshConnection = new SSHConnection(term, terminalConfig);
+sshConnection.connect();
+
+// Sayfa kapanırken bağlantıyı kapat
+window.addEventListener('beforeunload', () => {
+    sshConnection.disconnect();
 });
 
-// Terminal Boyutlandırma
-window.addEventListener('resize', () => {
-    fitAddon.fit();
-    ws.send(JSON.stringify({
-        type: 'resize',
-        cols: term.cols,
-        rows: term.rows
-    }));
-});
-
-// ESC tuşu ve buton sınıfı ekle
+// ESC tuşu ile tam ekrandan çıkma
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         const terminal = document.getElementById('terminal');

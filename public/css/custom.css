@@ -1,0 +1,23 @@
+/* AdminLTE özel stilleri */
+.content-wrapper {
+    height: calc(100vh - 57px) !important; /* Navbar yüksekliğini çıkar */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+.main-header {
+    z-index: 1000 !important;
+}
+
+.main-sidebar {
+    z-index: 1001 !important;
+    height: 100vh !important;
+    position: fixed !important;
+}
+
+/* Mobil görünüm için düzenleme */
+@media (max-width: 991.98px) {
+    .content-wrapper {
+        margin-left: 0 !important;
+    }
+}

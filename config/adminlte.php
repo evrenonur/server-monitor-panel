@@ -25,9 +25,9 @@ return [
 
     'layout_topnav' => null,
     'layout_boxed' => null,
-    'layout_fixed_sidebar' => null,
-    'layout_fixed_navbar' => null,
-    'layout_fixed_footer' => null,
+    'layout_fixed_sidebar' => true,
+    'layout_fixed_navbar' => true,
+    'layout_fixed_footer' => true,
     'layout_dark_mode' => null,
 
     'classes_auth_card' => 'card-outline card-primary',
@@ -37,18 +37,36 @@ return [
     'classes_auth_icon' => '',
     'classes_auth_btn' => 'btn-flat btn-primary',
 
+    'classes_body' => '',
+    'classes_brand' => '',
+    'classes_brand_text' => '',
+    'classes_content_wrapper' => 'overflow-auto',
+    'classes_content_header' => '',
+    'classes_content' => '',
+    'classes_sidebar' => 'sidebar-dark-primary elevation-4',
+    'classes_sidebar_nav' => '',
+    'classes_topnav' => 'navbar-white navbar-light',
+    'classes_topnav_nav' => 'navbar-expand',
+    'classes_topnav_container' => 'container',
+
     'use_route_url' => false,
-    'dashboard_url' => 'admin/dashboard',
+    'dashboard_url' => 'home',
     'logout_url' => 'logout',
     'login_url' => 'login',
-    'register_url' => null,
-    'password_reset_url' => null,
-    'password_email_url' => null,
+    'register_url' => 'register',
+    'password_reset_url' => 'password/reset',
+    'password_email_url' => 'password/email',
     'profile_url' => false,
 
     'enabled_laravel_mix' => false,
     'laravel_mix_css_path' => 'css/app.css',
     'laravel_mix_js_path' => 'js/app.js',
+
+    'extra_css' => [
+        'css/custom.css',
+    ],
+    'extra_js' => [
+    ],
 
     'menu' => [
         [

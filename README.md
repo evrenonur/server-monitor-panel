@@ -50,9 +50,13 @@ Token doğrulama için kullanılır. Authorization header'ında token gereklidir
    * Kullanıcı Adı: **admin@admin.com**
    * Şifre: **password**
 
-## 🚀 Kurulum Node.js
-2. `npm install` - Gerekli bağımlılıkları yükleyin
-3. `node websocket-server.js` - WebSocket sunucusunu başlatın
+## 🚀 Kurulum WebSocket Server
+
+1. `cd websocket-server` - WebSocket sunucusunun bulunduğu dizine gidin
+2. `docker-compose.yml` dosyasını düzenleyin
+3. `docker-compose up -d` - WebSocket sunucusunu başlatın
+
+
 
 ## 📝 Lisans
 

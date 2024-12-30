@@ -17,7 +17,6 @@ class ServerSshController extends Controller
         auth()->user()->setAttribute('api_token', $token);
         return view('admin.servers.ssh', [
             'server' => $server,
-
         ]);
     }
 }
