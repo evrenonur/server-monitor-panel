@@ -14,7 +14,10 @@ Bu platform, sunucularınızı gerçek zamanlı olarak izlemenizi ve yönetmeniz
 * **🔄 Güncellemeler**: Sistem güncellemelerini takip edin
 * **📈 Metrikler**: Detaylı performans grafikleri ve raporlar
 * **🔐 Güvenlik**: Token tabanlı kimlik doğrulama ve yetkilendirme
-* **🔄 WebSocket**: Sunucularınızı gerçek zamanlı olarak izlemek için WebSocket kullanıyoruz
+* **📡 WebSocket**: Sunucularınızı gerçek zamanlı olarak izlemek için WebSocket kullanıyoruz
+* **🔑 WebSSH2**: Sunucularınızı SSH ile yönetmek için WebSSH2 kullanıyoruz
+* **🐳 Docker**: Docker desteği
+* **📂 File Manager**: Dosya yönetimi için File Manager kullanıyoruz
 
 ## 🛠️ Teknolojiler
 
@@ -26,7 +29,7 @@ Bu platform, sunucularınızı gerçek zamanlı olarak izlemenizi ve yönetmeniz
 * WebSocket
 * Node.js
 * WebSSH2
-
+* Docker
 
 
 ## ⚙️ API Endpointleri
