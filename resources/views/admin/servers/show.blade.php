@@ -435,14 +435,6 @@
                     <small class="text-muted ml-2">(Son güncelleme: <span class="last-update-time"></span>)</small>
                 </small>
             </h3>
-            <div class="card-tools">
-                <select class="form-control form-control-sm" id="status-filter-services">
-                    <option value="">Tümü</option>
-                    <option value="active">Aktif</option>
-                    <option value="inactive">Pasif</option>
-                    <option value="failed">Başarısız</option>
-                </select>
-            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -1073,14 +1065,12 @@
             // Güncelleme butonları için event handler'lar
             $('.update-server').on('click', function() {
                 const serverId = $(this).data('server-id');
-                const url = "{{ route('admin.servers.package.update', ['server' => $server->id]) }}";
                 window.currentCommand = 'sudo apt-get update && sudo apt-get upgrade -y';
                 $('#sshTerminalModal').modal('show');
             });
 
             $('.update-selected').on('click', function() {
                 const serverId = $(this).data('server-id');
-                const url = "{{ route('admin.servers.package.update', ['server' => $server->id]) }}";
                 const selectedPackages = [];
                 $('.package-select:checked').each(function() {
                     selectedPackages.push($(this).val());
@@ -1109,17 +1099,11 @@
             // WebSocket bağlantısı ve yönetimi
             function initWebSocket() {
                 const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-                const ws = new WebSocket(`${protocol}://{{ $server->ip_address }}:{{ $server->ws_port }}`);
-                const timestamp = Math.floor(Date.now() / 1000).toString();
-                const authKey = CryptoJS.HmacSHA256(timestamp, '{{ $server->api_key }}').toString();
+                const url = `${protocol}://{{ $server->ip_address }}:{{ $server->ws_port }}/?token={{ auth()->user()->api_token }}`;
+                const ws = new WebSocket(url);
 
                 ws.onopen = function() {
                     console.log('WebSocket bağlantısı açıldı');
-                    // Doğrulama bilgilerini gönder
-                    ws.send(JSON.stringify({
-                        api_key: authKey,
-                        timestamp: timestamp
-                    }));
 
                     // İlk verileri al
                     ws.send(JSON.stringify({ command: 'process' }));

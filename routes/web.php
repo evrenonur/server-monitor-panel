@@ -41,10 +41,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Server SSH route
     Route::get('servers/{server}/ssh', [ServerSshController::class, 'show'])->name('servers.ssh');
-
-    // Server update route
-    Route::post('servers/{server}/update', [ServerUpdateController::class, 'update'])->name('servers.package.update');
-
     // Server usage routes
     Route::get('servers/{server}/usage', [ServerUsageController::class, 'show'])->name('servers.usage');
     Route::get('servers/{server}/usage/data', [ServerUsageController::class, 'data'])->name('servers.usage.data');
