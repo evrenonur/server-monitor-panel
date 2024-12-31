@@ -47,6 +47,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Docker route
     Route::get('/servers/{server}/docker', [ServerController::class, 'docker'])->name('servers.docker');
+
+    // Filemanager route
+    Route::get('/servers/{server}/filemanager', [ServerController::class, 'filemanager'])->name('servers.filemanager');
 });
 
 Route::get('/admin/servers/{server}/test', [App\Http\Controllers\Admin\ServerController::class, 'test'])->name('admin.servers.test');

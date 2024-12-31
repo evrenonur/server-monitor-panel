@@ -94,6 +94,17 @@ class ServerController extends Controller
         return view('admin.servers.docker', compact('server'));
     }
 
+    /**
+     * Dosya yöneticisi sayfasını göster
+     *
+     * @param Server $server
+     * @return \Illuminate\View\View
+     */
+    public function filemanager(Server $server)
+    {
+        return view('admin.servers.filemanager', compact('server'));
+    }
+
     protected function validateServer(Request $request): array
     {
         return $request->validate([

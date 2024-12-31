@@ -73,11 +73,11 @@
                                         <a class="dropdown-item" href="{{ route('admin.servers.usage', $server) }}">
                                             <i class="fas fa-chart-line"></i> Kullanım Detayları
                                         </a>
-                                        <a class="dropdown-item" href="{{ route('admin.servers.test', $server) }}">
-                                            <i class="fas fa-terminal"></i> Test
-                                        </a>
                                         <a class="dropdown-item" href="{{ route('admin.servers.docker', $server) }}">
                                             <i class="fab fa-docker"></i> Docker
+                                        </a>
+                                        <a class="dropdown-item" href="{{ route('admin.servers.filemanager', $server) }}">
+                                            <i class="fas fa-folder"></i> Dosya Yöneticisi
                                         </a>
                                         <a class="dropdown-item" href="{{ route('admin.servers.ssh', $server) }}">
                                             <i class="fas fa-terminal"></i> SSH Bağlantısı
