@@ -83,6 +83,17 @@ class ServerController extends Controller
         return view('admin.servers.test', compact('server'));
     }
 
+    /**
+     * Docker detaylarını göster
+     *
+     * @param Server $server
+     * @return \Illuminate\View\View
+     */
+    public function docker(Server $server)
+    {
+        return view('admin.servers.docker', compact('server'));
+    }
+
     protected function validateServer(Request $request): array
     {
         return $request->validate([

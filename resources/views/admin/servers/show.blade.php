@@ -9,12 +9,13 @@
             {{ $server->name }}
         </h1>
         <div>
-            <a href="{{ route('admin.servers.edit', $server) }}" class="btn btn-info">
+            <a href="{{ route('admin.servers.edit', $server) }}" class="btn btn-info btn-sm">
                 <i class="fas fa-edit"></i> Düzenle
             </a>
-            <a href="{{ route('admin.servers.index') }}" class="btn btn-secondary">
+            <a href="{{ route('admin.servers.index') }}" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Geri
             </a>
+
         </div>
     </div>
 @stop

@@ -43,8 +43,10 @@ $(function() {
         // HMAC-SHA256 ile auth_key oluştur
         const authKey = CryptoJS.HmacSHA256(timestamp, apiKey).toString();
 
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const url = `${protocol}://{{ $server->ip_address }}:{{ $server->ws_port }}/?token={{ auth()->user()->api_token }}`;
+        const ws = new WebSocket(url);
         // WebSocket bağlantısı
-        const ws = new WebSocket('ws://{{ $server->ip_address }}:8765');
 
         ws.onopen = function() {
             // Önce doğrulama bilgilerini gönder

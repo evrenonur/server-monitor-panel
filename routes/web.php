@@ -44,6 +44,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Server usage routes
     Route::get('servers/{server}/usage', [ServerUsageController::class, 'show'])->name('servers.usage');
     Route::get('servers/{server}/usage/data', [ServerUsageController::class, 'data'])->name('servers.usage.data');
+
+    // Docker route
+    Route::get('/servers/{server}/docker', [ServerController::class, 'docker'])->name('servers.docker');
 });
 
 Route::get('/admin/servers/{server}/test', [App\Http\Controllers\Admin\ServerController::class, 'test'])->name('admin.servers.test');
