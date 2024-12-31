@@ -1151,29 +1151,10 @@
                                 case 'resources':
                                     updateResourceUsage(response.data);
                                     break;
-                                case 'kill':
-                                case 'stop':
-                                case 'continue':
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Başarılı',
-                                        text: 'İşlem başarıyla tamamlandı.',
-                                        timer: 1500
-                                    });
-                                    setTimeout(() => {
-                                        if (ws.readyState === WebSocket.OPEN) {
-                                            ws.send(JSON.stringify({ command: 'process' }));
-                                        }
-                                    }, 1000);
-                                    break;
                                 case 'service_start':
-                                case 'service_stop':
-                                case 'service_restart':
-                                    Swal.fire({
+                                    Toast.fire({
                                         icon: 'success',
-                                        title: 'Başarılı',
-                                        text: 'Servis işlemi başarıyla tamamlandı.',
-                                        timer: 1500
+                                        title: 'Servis başlatıldı'
                                     });
                                     setTimeout(() => {
                                         if (ws.readyState === WebSocket.OPEN) {
@@ -1181,17 +1162,77 @@
                                         }
                                     }, 1000);
                                     break;
+                                case 'service_stop':
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: 'Servis durduruldu'
+                                    });
+                                    setTimeout(() => {
+                                        if (ws.readyState === WebSocket.OPEN) {
+                                            ws.send(JSON.stringify({ command: 'services' }));
+                                        }
+                                    }, 1000);
+                                    break;
+                                case 'service_restart':
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: 'Servis yeniden başlatıldı'
+                                    });
+                                    setTimeout(() => {
+                                        if (ws.readyState === WebSocket.OPEN) {
+                                            ws.send(JSON.stringify({ command: 'services' }));
+                                        }
+                                    }, 1000);
+                                    break;
+                                case 'kill':
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: 'Süreç sonlandırıldı'
+                                    });
+                                    setTimeout(() => {
+                                        if (ws.readyState === WebSocket.OPEN) {
+                                            ws.send(JSON.stringify({ command: 'process' }));
+                                        }
+                                    }, 1000);
+                                    break;
+                                case 'stop':
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: 'Süreç duraklatıldı'
+                                    });
+                                    setTimeout(() => {
+                                        if (ws.readyState === WebSocket.OPEN) {
+                                            ws.send(JSON.stringify({ command: 'process' }));
+                                        }
+                                    }, 1000);
+                                    break;
+                                case 'continue':
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: 'Süreç devam ettiriliyor'
+                                    });
+                                    setTimeout(() => {
+                                        if (ws.readyState === WebSocket.OPEN) {
+                                            ws.send(JSON.stringify({ command: 'process' }));
+                                        }
+                                    }, 1000);
+                                    break;
                             }
                         }
                         else {
-                            Swal.fire({
+                            Toast.fire({
                                 icon: 'error',
-                                title: 'Hata',
+                                title: 'Hata!',
                                 text: response.stderr || 'Bir hata oluştu.'
                             });
                         }
                     } catch (e) {
                         console.error('WebSocket mesaj hatası:', e);
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'İşlem başarısız',
+                            text: 'Beklenmeyen bir hata oluştu.'
+                        });
                     }
                 };
 
@@ -1219,28 +1260,50 @@
                 const pid = $(this).data('pid');
                 const action = $(this).data('action');
                 const processName = $(this).data('name');
-                let confirmMessage = '';
+                let title = '';
+                let text = '';
+                let icon = 'warning';
 
                 switch(action) {
                     case 'stop':
-                        confirmMessage = `"${processName}" (PID: ${pid}) sürecini duraklatmak istediğinize emin misiniz?`;
+                        title = 'Süreci Duraklat';
+                        text = `"${processName}" (PID: ${pid}) sürecini duraklatmak istediğinize emin misiniz?`;
                         break;
                     case 'continue':
-                        confirmMessage = `"${processName}" (PID: ${pid}) sürecini devam ettirmek istediğinize emin misiniz?`;
+                        title = 'Süreci Devam Ettir';
+                        text = `"${processName}" (PID: ${pid}) sürecini devam ettirmek istediğinize emin misiniz?`;
+                        icon = 'info';
                         break;
                     case 'kill':
-                        confirmMessage = `"${processName}" (PID: ${pid}) sürecini sonlandırmak istediğinize emin misiniz?`;
+                        title = 'Süreci Sonlandır';
+                        text = `"${processName}" (PID: ${pid}) sürecini sonlandırmak istediğinize emin misiniz?`;
+                        icon = 'error';
                         break;
                 }
 
-                if (confirm(confirmMessage)) {
-                    if (window.serverWs && window.serverWs.readyState === WebSocket.OPEN) {
-                        window.serverWs.send(JSON.stringify({
-                            command: action,
-                            pid: pid
-                        }));
+                Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: icon,
+                    showCancelButton: true,
+                    confirmButtonText: 'Evet',
+                    cancelButtonText: 'İptal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (window.serverWs && window.serverWs.readyState === WebSocket.OPEN) {
+                            window.serverWs.send(JSON.stringify({
+                                command: action,
+                                pid: pid
+                            }));
+
+                            Toast.fire({
+                                icon: 'info',
+                                title: 'İşlem gerçekleştiriliyor...'
+                            });
+                        }
                     }
-                }
+                });
             });
 
             // Süreç detay butonu için event handler
@@ -1255,36 +1318,67 @@
                 }
             });
 
+            // SweetAlert2 Toast Mixin tanımı
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+
             // Servis kontrol butonları için event handler
             $(document).on('click', '.service-control', function() {
                 const service = $(this).data('service');
                 const action = $(this).data('action');
                 const state = $(this).data('state');
-                let confirmMessage = '';
+                let title = '';
+                let text = '';
+                let icon = 'warning';
 
                 switch(action) {
                     case 'start':
-                        confirmMessage = `"${service}" servisini başlatmak istediğinize emin misiniz?`;
+                        title = 'Servisi Başlat';
+                        text = `"${service}" servisini başlatmak istediğinize emin misiniz?`;
                         break;
                     case 'stop':
-                        confirmMessage = `"${service}" servisini durdurmak istediğinize emin misiniz?`;
+                        title = 'Servisi Durdur';
+                        text = `"${service}" servisini durdurmak istediğinize emin misiniz?`;
                         break;
                     case 'restart':
-                        confirmMessage = `"${service}" servisini yeniden başlatmak istediğinize emin misiniz?`;
+                        title = 'Servisi Yeniden Başlat';
+                        text = `"${service}" servisini yeniden başlatmak istediğinize emin misiniz?`;
                         break;
                     case 'status':
-                        confirmMessage = `"${service}" servisinin durumunu görüntülemek istediğinize emin misiniz?`;
+                        title = 'Servis Durumu';
+                        text = `"${service}" servisinin durumunu görüntülemek istediğinize emin misiniz?`;
+                        icon = 'info';
                         break;
                 }
 
-                if (confirm(confirmMessage)) {
-                    if (window.serverWs && window.serverWs.readyState === WebSocket.OPEN) {
-                        window.serverWs.send(JSON.stringify({
-                            command: `service_${action}`,
-                            name: service
-                        }));
+                Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: icon,
+                    showCancelButton: true,
+                    confirmButtonText: 'Evet',
+                    cancelButtonText: 'İptal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (window.serverWs && window.serverWs.readyState === WebSocket.OPEN) {
+                            window.serverWs.send(JSON.stringify({
+                                command: `service_${action}`,
+                                name: service
+                            }));
+
+                            Toast.fire({
+                                icon: 'info',
+                                title: 'İşlem gerçekleştiriliyor...'
+                            });
+                        }
                     }
-                }
+                });
             });
 
             // Tüm paketleri seç/kaldır
@@ -1360,8 +1454,30 @@
                         process.pid,
                         process.name,
                         process.username,
-                        `${process.cpu_percent.toFixed(1)}%`,
-                        `${process.memory_percent.toFixed(1)}%`,
+                        `<div class="d-flex align-items-center">
+                            <div class="progress flex-grow-1" style="height: 6px;">
+                                <div class="progress-bar ${getCPUProgressBarClass(process.cpu_percent)}"
+                                     role="progressbar"
+                                     style="width: ${process.cpu_percent}%;"
+                                     aria-valuenow="${process.cpu_percent}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <span class="ml-2" style="min-width: 45px;">${process.cpu_percent.toFixed(1)}%</span>
+                        </div>`,
+                        `<div class="d-flex align-items-center">
+                            <div class="progress flex-grow-1" style="height: 6px;">
+                                <div class="progress-bar ${getMemoryProgressBarClass(process.memory_percent)}"
+                                     role="progressbar"
+                                     style="width: ${process.memory_percent}%;"
+                                     aria-valuenow="${process.memory_percent}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <span class="ml-2" style="min-width: 45px;">${process.memory_percent.toFixed(1)}%</span>
+                        </div>`,
                         `<span class="badge badge-${badge}" data-status="${process.status}">
                             <i class="fas fa-${getProcessStatusIcon(process.status)}"></i>
                             ${label}
@@ -1376,6 +1492,21 @@
 
                 // Scroll pozisyonunu koru
                 $(window).scrollTop(currentScroll);
+            }
+
+            // Progress bar renk sınıflarını belirle
+            function getCPUProgressBarClass(percent) {
+                if (percent >= 90) return 'bg-danger';
+                if (percent >= 70) return 'bg-warning';
+                if (percent >= 50) return 'bg-info';
+                return 'bg-success';
+            }
+
+            function getMemoryProgressBarClass(percent) {
+                if (percent >= 90) return 'bg-danger';
+                if (percent >= 70) return 'bg-warning';
+                if (percent >= 50) return 'bg-info';
+                return 'bg-success';
             }
 
             // Servisleri tabloda güncelle
