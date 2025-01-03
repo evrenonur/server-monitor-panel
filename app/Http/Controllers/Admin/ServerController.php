@@ -105,6 +105,17 @@ class ServerController extends Controller
         return view('admin.servers.filemanager', compact('server'));
     }
 
+    /**
+     * Güvenlik sayfasını göster
+     *
+     * @param Server $server
+     * @return \Illuminate\View\View
+     */
+    public function security(Server $server)
+    {
+        return view('admin.servers.security', compact('server'));
+    }
+
     protected function validateServer(Request $request): array
     {
         return $request->validate([
@@ -117,4 +128,6 @@ class ServerController extends Controller
             'is_active' => 'boolean'
         ]);
     }
+
+
 }

@@ -82,6 +82,9 @@
                                         <a class="dropdown-item" href="{{ route('admin.servers.ssh', $server) }}">
                                             <i class="fas fa-terminal"></i> SSH Bağlantısı
                                         </a>
+                                        <a class="dropdown-item" href="{{ route('admin.servers.security', $server) }}">
+                                            <i class="fas fa-shield-alt"></i> Güvenlik
+                                        </a>
                                         <a class="dropdown-item" href="{{ route('admin.servers.edit', $server) }}">
                                             <i class="fas fa-edit"></i> Düzenle
                                         </a>

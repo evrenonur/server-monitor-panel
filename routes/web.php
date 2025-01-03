@@ -50,6 +50,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Filemanager route
     Route::get('/servers/{server}/filemanager', [ServerController::class, 'filemanager'])->name('servers.filemanager');
+
+    // Security route
+    Route::get('/servers/{server}/security', [ServerController::class, 'security'])->name('servers.security');
 });
 
 Route::get('/admin/servers/{server}/test', [App\Http\Controllers\Admin\ServerController::class, 'test'])->name('admin.servers.test');
