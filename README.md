@@ -55,7 +55,7 @@ Token doğrulama için kullanılır. Authorization header'ında token gereklidir
 
 ## 🚀 Kurulum WebSocket Server
 
-1. `cd websocket-server` - WebSocket sunucusunun bulunduğu dizine gidin
+1. `cd websocket-service` - WebSocket sunucusunun bulunduğu dizine gidin
 2. `docker-compose.yml` dosyasını düzenleyin
 3. `docker-compose up -d` - WebSocket sunucusunu başlatın
 
